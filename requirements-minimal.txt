@@ -1,0 +1,13 @@
+# Dependencias MÍNIMAS para funcionalidad básica
+# Use este archivo si tiene problemas con requirements.txt
+
+# Solo lo esencial
+MetaTrader5
+pandas
+numpy
+plotly
+scipy
+
+# Opcional pero recomendado
+matplotlib
+quantstats

@@ -1,0 +1,283 @@
+"""
+EJEMPLO SIMPLE Y RÁPIDO
+Estrategia NY Range Breakout para XAUUSD
+
+Este archivo contiene un ejemplo minimalista para comenzar rápidamente.
+Para uso completo, ver: run_ny_range_backtest.py y GUIA_NY_RANGE_BREAKOUT.md
+"""
+
+from datetime import datetime, timedelta
+import pandas as pd
+import numpy as np
+from ny_range_breakout_strategy import NYRangeBreakout
+
+# ============================================================================
+# PASO 1: GENERAR DATOS DE MUESTRA
+# ============================================================================
+
+def generar_datos_xauusd(dias=365):
+    """Genera datos sintéticos de XAUUSD para pruebas"""
+    print(f"📊 Generando {dias} días de datos XAUUSD...")
+    
+    # Crear timestamps (barras de 5 minutos)
+    fechas = pd.date_range(
+        end=datetime.now(),
+        periods=dias * 288,  # 288 barras de 5 min por día
+        freq='5min'
+    )
+    
+    # Simular precios realistas
+    np.random.seed(42)
+    precio_inicial = 2000.0
+    precios = precio_inicial + np.cumsum(np.random.normal(0.05, 2.0, len(fechas)))
+    
+    # Crear DataFrame OHLC
+    data = pd.DataFrame({
+        'open': precios,
+        'high': precios * 1.002,
+        'low': precios * 0.998,
+        'close': precios * (1 + np.random.normal(0, 0.001, len(fechas))),
+        'tick_volume': np.random.randint(100, 1000, len(fechas)),
+        'spread': 20,
+        'real_volume': np.random.randint(1000, 10000, len(fechas))
+    }, index=fechas)
+    
+    # Ajustar high/low
+    data['high'] = data[['open', 'high', 'close']].max(axis=1)
+    data['low'] = data[['open', 'low', 'close']].min(axis=1)
+    
+    print(f"✅ Datos generados: {len(data)} barras")
+    return data
+
+
+# ============================================================================
+# PASO 2: CREAR Y CONFIGURAR ESTRATEGIA
+# ============================================================================
+
+print("\n" + "="*70)
+print("🎯 NY RANGE BREAKOUT - EJEMPLO SIMPLE")
+print("="*70)
+
+# Crear estrategia con parámetros por defecto
+estrategia = NYRangeBreakout(
+    range_start_hour=21,        # 21:50 hora NY
+    range_start_minute=50,
+    range_end_hour=22,          # 22:15 hora NY
+    range_end_minute=15,
+    stop_loss_pips=34.0,        # 34 pips SL
+    take_profit_pips=83.0,      # 83 pips TP
+    min_range_pips=5.0,         # Rango mínimo 5 pips
+    max_trades_per_day=1,       # Máximo 1 trade por día
+    use_trailing_stop=True,     # ✨ Activar trailing stop
+    trailing_stop_pips=20.0,    # 20 pips de trailing
+    trailing_activation_pips=30.0  # Activar tras 30 pips ganancia
+)
+
+print("\n✅ Estrategia creada:")
+print(f"   Horario: 21:50 - 22:15 NY")
+print(f"   SL: {estrategia.parameters['stop_loss_pips']} pips")
+print(f"   TP: {estrategia.parameters['take_profit_pips']} pips")
+print(f"   Trailing Stop: {'Activado' if estrategia.parameters['use_trailing_stop'] else 'Desactivado'}")
+if estrategia.parameters['use_trailing_stop']:
+    print(f"   - Distancia: {estrategia.parameters['trailing_stop_pips']} pips")
+    print(f"   - Activación: {estrategia.parameters['trailing_activation_pips']} pips ganancia")
+
+
+# ============================================================================
+# PASO 3: CARGAR DATOS
+# ============================================================================
+
+# Opción A: Usar datos de muestra (recomendado para empezar)
+datos = generar_datos_xauusd(dias=180)  # 6 meses
+
+# Opción B: Usar datos reales de MT5 (descomentar si tienes MT5)
+"""
+from data_manager import MT5DataManager
+from config.settings import MT5Config
+
+data_manager = MT5DataManager(MT5Config())
+data_manager.connect()
+datos = data_manager.get_historical_data(
+    symbol="XAUUSD",
+    timeframe="M5",
+    start_date=datetime.now() - timedelta(days=180),
+    count=50000
+)
+data_manager.disconnect()
+"""
+
+
+# ============================================================================
+# PASO 4: EJECUTAR ESTRATEGIA (Calcular Indicadores y Señales)
+# ============================================================================
+
+print("\n⚙️ Ejecutando estrategia...")
+
+# Calcular indicadores
+datos_con_indicadores = estrategia.calculate_indicators(datos)
+
+# Generar señales
+señales = estrategia.generate_signals(datos_con_indicadores)
+
+print(f"\n✅ Estrategia ejecutada:")
+print(f"   Señales generadas: {len(señales)}")
+
+
+# ============================================================================
+# PASO 5: ANALIZAR SEÑALES
+# ============================================================================
+
+print("\n📊 ANÁLISIS DE SEÑALES:")
+print("="*70)
+
+if len(señales) > 0:
+    # Contar señales por tipo
+    compras = sum(1 for s in señales if s.signal_type == 'BUY')
+    ventas = sum(1 for s in señales if s.signal_type == 'SELL')
+    
+    print(f"\n📈 Señales de COMPRA: {compras}")
+    print(f"📉 Señales de VENTA: {ventas}")
+    print(f"📊 Total de señales: {len(señales)}")
+    
+    # Mostrar primeras 5 señales
+    print("\n🔍 Primeras 5 señales:")
+    print("-" * 70)
+    
+    for i, señal in enumerate(señales[:5]):
+        print(f"\n{i+1}. {señal.signal_type}")
+        print(f"   Fecha: {señal.timestamp}")
+        print(f"   Precio: {señal.price:.2f}")
+        print(f"   Stop Loss: {señal.stop_loss:.2f}")
+        print(f"   Take Profit: {señal.take_profit:.2f}")
+        
+        # Calcular R:R
+        if señal.signal_type == 'BUY':
+            riesgo = señal.price - señal.stop_loss
+            recompensa = señal.take_profit - señal.price
+        else:  # SELL
+            riesgo = señal.stop_loss - señal.price
+            recompensa = señal.price - señal.take_profit
+        
+        rr_ratio = recompensa / riesgo if riesgo > 0 else 0
+        print(f"   Risk:Reward: 1:{rr_ratio:.2f}")
+        print(f"   Rango: {señal.metadata.get('range_pips', 0):.1f} pips")
+        print(f"   Tipo: {señal.metadata.get('breakout_type', 'N/A')}")
+    
+    # Estadísticas de rangos
+    rangos = [s.metadata.get('range_pips', 0) for s in señales]
+    print(f"\n📊 ESTADÍSTICAS DE RANGOS:")
+    print(f"   Rango promedio: {np.mean(rangos):.2f} pips")
+    print(f"   Rango mínimo: {np.min(rangos):.2f} pips")
+    print(f"   Rango máximo: {np.max(rangos):.2f} pips")
+    print(f"   Desviación estándar: {np.std(rangos):.2f} pips")
+    
+else:
+    print("⚠️ No se generaron señales")
+    print("   Posibles razones:")
+    print("   - Periodo muy corto")
+    print("   - Rangos muy pequeños (< min_range_pips)")
+    print("   - Datos fuera del horario NY")
+
+
+# ============================================================================
+# PASO 6: EJECUTAR BACKTEST COMPLETO (OPCIONAL)
+# ============================================================================
+
+print("\n" + "="*70)
+print("💡 SIGUIENTE PASO: BACKTEST COMPLETO")
+print("="*70)
+
+print("""
+Para un backtest completo con:
+- Simulación realista de trades
+- Cálculo de métricas (Sharpe, Drawdown, etc.)
+- Reportes HTML con gráficos
+- Análisis de rendimiento
+
+Ejecuta:
+    python run_ny_range_backtest.py
+
+O usa el BacktestEngine:
+""")
+
+print("""
+from backtest_engine import BacktestEngine
+from config.settings import BacktestConfig
+
+config = BacktestConfig(
+    initial_capital=10000.0,
+    commission_pct=0.0001,
+    slippage_pct=0.0005
+)
+
+symbol_info = {
+    'point': 0.01,
+    'digits': 2,
+    'trade_contract_size': 100.0
+}
+
+engine = BacktestEngine(config)
+resultado = engine.run(estrategia, datos, symbol_info)
+
+print(resultado.summary())
+""")
+
+
+# ============================================================================
+# PASO 7: OPTIMIZACIÓN ML (OPCIONAL)
+# ============================================================================
+
+print("\n" + "="*70)
+print("🤖 OPTIMIZACIÓN CON MACHINE LEARNING")
+print("="*70)
+
+print("""
+Para encontrar los mejores parámetros automáticamente:
+
+    python run_ny_range_backtest.py
+    # Selecciona opción: 3
+
+O directamente:
+""")
+
+print("""
+from ml_optimizer import MLStrategyOptimizer
+
+optimizer = MLStrategyOptimizer(
+    strategy_class=NYRangeBreakout,
+    data=datos,
+    symbol_info=symbol_info,
+    target_metric='sharpe_ratio',
+    n_iterations=50
+)
+
+resultado_opt = optimizer.bayesian_optimization()
+print(resultado_opt.best_params)
+""")
+
+
+# ============================================================================
+# RESUMEN FINAL
+# ============================================================================
+
+print("\n" + "="*70)
+print("✅ EJEMPLO COMPLETADO")
+print("="*70)
+
+print(f"""
+📊 Resumen:
+   - Datos procesados: {len(datos)} barras
+   - Señales generadas: {len(señales)}
+   - Período analizado: {datos.index[0]} a {datos.index[-1]}
+
+📚 Próximos pasos:
+   1. Revisar GUIA_NY_RANGE_BREAKOUT.md para guía completa
+   2. Ejecutar run_ny_range_backtest.py para backtest completo
+   3. Probar optimización ML (opción 3)
+   4. Experimentar con diferentes parámetros
+
+⚠️ Recuerda: Este es un sistema de backtesting educacional.
+   Prueba extensivamente antes de usar en trading real.
+
+🚀 ¡Feliz backtesting!
+""")

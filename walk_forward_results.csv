@@ -1,0 +1,6 @@
+window,train_start,train_end,test_start,test_end,best_params,train_score,test_score,overfit_ratio
+1,2024-01-29 11:00:00,2024-03-08 14:00:00,2024-03-08 15:00:00,2024-03-27 02:00:00,"{'fast_period': 13, 'slow_period': 49, 'rsi_period': 15, 'rsi_overbought': 75, 'rsi_oversold': 27, 'atr_stop_multiplier': 2.75, 'risk_reward_ratio': 1.75}",0.0,0.0,inf
+2,2024-03-27 03:00:00,2024-05-07 06:00:00,2024-05-07 07:00:00,2024-05-23 18:00:00,"{'fast_period': 13, 'slow_period': 49, 'rsi_period': 15, 'rsi_overbought': 75, 'rsi_oversold': 27, 'atr_stop_multiplier': 2.75, 'risk_reward_ratio': 1.75}",0.0,0.0,inf
+3,2024-05-23 19:00:00,2024-07-03 22:00:00,2024-07-03 23:00:00,2024-07-22 10:00:00,"{'fast_period': 13, 'slow_period': 49, 'rsi_period': 15, 'rsi_overbought': 75, 'rsi_oversold': 27, 'atr_stop_multiplier': 2.75, 'risk_reward_ratio': 1.75}",0.0,0.0,inf
+4,2024-07-22 11:00:00,2024-08-30 14:00:00,2024-08-30 15:00:00,2024-09-18 02:00:00,"{'fast_period': 13, 'slow_period': 49, 'rsi_period': 15, 'rsi_overbought': 75, 'rsi_oversold': 27, 'atr_stop_multiplier': 2.75, 'risk_reward_ratio': 1.75}",0.0,0.0,inf
+5,2024-09-18 03:00:00,2024-10-29 06:00:00,2024-10-29 07:00:00,2024-11-14 18:00:00,"{'fast_period': 13, 'slow_period': 49, 'rsi_period': 15, 'rsi_overbought': 75, 'rsi_oversold': 27, 'atr_stop_multiplier': 2.75, 'risk_reward_ratio': 1.75}",0.0,0.0,inf
