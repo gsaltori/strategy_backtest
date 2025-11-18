@@ -1,0 +1,4 @@
+Estrategia,Trades,Win Rate %,Return %,Sharpe,Max DD %,Profit Factor,Capital Final
+ML Conservative,0,0.0%,0.0%,0.00,0.0%,0.00,"$10,000"
+ML Balanced,0,0.0%,0.0%,0.00,0.0%,0.00,"$10,000"
+ML Aggressive,0,0.0%,0.0%,0.00,0.0%,0.00,"$10,000"

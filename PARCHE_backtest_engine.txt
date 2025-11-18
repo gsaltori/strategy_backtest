@@ -1,0 +1,40 @@
+# PARCHES PARA BACKTEST_ENGINE.PY
+# Aplicar estos cambios al archivo backtest_engine.py
+
+## CAMBIO 1: Actualizar la llamada a manage_risk en _open_position
+
+### ANTES (LÍNEA ~XXX en _open_position):
+```python
+# Aplicar gestión de riesgo
+signal = strategy.manage_risk(signal, bar['close'], self.current_balance)
+```
+
+### DESPUÉS:
+```python
+# Aplicar gestión de riesgo
+# ✅ CORRECCIÓN: Pasar symbol_info para cálculo correcto de lotaje
+signal = strategy.manage_risk(
+    signal, 
+    bar['close'], 
+    self.current_balance,
+    symbol_info  # ← CRÍTICO: Pasar información del símbolo
+)
+```
+
+## EXPLICACIÓN:
+Este cambio es CRÍTICO porque sin pasar symbol_info, la estrategia no puede calcular
+correctamente el tamaño de posición para instrumentos como ORO, ÍNDICES, etc.
+
+El método manage_risk de base_strategy.py ahora requiere symbol_info como cuarto parámetro
+para poder aplicar la fórmula correcta de cálculo de lotaje.
+
+## VERIFICACIÓN:
+Después de aplicar el cambio, verificar que:
+1. symbol_info se pasa correctamente desde run() hasta _open_position()
+2. El logging muestra "Position size calculation" con detalles
+3. Los tamaños de posición son razonables para el instrumento
+
+## IMPACTO:
+- ✅ Cálculo correcto de lotaje para TODOS los instrumentos
+- ✅ Riesgo real coincide con el porcentaje configurado
+- ✅ Evita posiciones excesivamente grandes o pequeñas

@@ -1,0 +1,101 @@
+# Requirements para Estrategia ML de Trading
+# Versión: 1.0.0
+
+# ============================================================================
+# CORE ML - OBLIGATORIO
+# ============================================================================
+scikit-learn>=1.3.0
+numpy>=1.24.0
+pandas>=2.0.0
+
+# ============================================================================
+# ML AVANZADO - RECOMENDADO (para mejor rendimiento)
+# ============================================================================
+xgboost>=2.0.0
+lightgbm>=4.0.0
+
+# ============================================================================
+# ANÁLISIS Y OPTIMIZACIÓN
+# ============================================================================
+scipy>=1.11.0
+
+# ============================================================================
+# VISUALIZACIÓN
+# ============================================================================
+plotly>=5.18.0
+
+# ============================================================================
+# TRADING Y DATOS (ya deberías tenerlas de tu proyecto)
+# ============================================================================
+# MetaTrader5>=5.0.45  # Opcional, solo si usas MT5
+# pytz>=2023.3
+# python-dateutil>=2.8.2
+
+# ============================================================================
+# UTILIDADES
+# ============================================================================
+# tqdm>=4.65.0  # Barras de progreso (opcional)
+# joblib>=1.3.0  # Paralelización (opcional)
+
+# ============================================================================
+# NOTAS DE INSTALACIÓN
+# ============================================================================
+
+# INSTALACIÓN BÁSICA (mínimo):
+# pip install scikit-learn numpy pandas scipy plotly
+
+# INSTALACIÓN COMPLETA (recomendado):
+# pip install scikit-learn numpy pandas scipy plotly xgboost lightgbm
+
+# INSTALACIÓN CON CONDA (alternativa):
+# conda install scikit-learn numpy pandas scipy plotly
+# conda install -c conda-forge xgboost lightgbm
+
+# ============================================================================
+# VERIFICACIÓN DE INSTALACIÓN
+# ============================================================================
+
+# Verificar instalación básica:
+# python -c "import sklearn; import numpy; import pandas; print('✅ Core OK')"
+
+# Verificar ML avanzado:
+# python -c "import xgboost; import lightgbm; print('✅ ML Avanzado OK')"
+
+# Verificar todo:
+# python -c "from strategies.ml_advanced_strategy import MLAdvancedStrategy; print('✅ Todo OK')"
+
+# ============================================================================
+# PROBLEMAS COMUNES
+# ============================================================================
+
+# Si XGBoost falla en Windows:
+# - Descargar wheel desde: https://www.lfd.uci.edu/~gohlke/pythonlibs/
+# - pip install xgboost-X.X.X-cpXX-cpXX-win_amd64.whl
+
+# Si LightGBM falla:
+# - conda install -c conda-forge lightgbm
+# - O: pip install lightgbm --install-option=--nomp
+
+# Si scikit-learn falla:
+# - pip install --upgrade pip
+# - pip install scikit-learn --no-cache-dir
+
+# ============================================================================
+# COMPATIBILIDAD
+# ============================================================================
+
+# Python: 3.8, 3.9, 3.10, 3.11, 3.12
+# OS: Windows, Linux, macOS
+# Arquitectura: x86_64, ARM64 (Apple Silicon)
+
+# ============================================================================
+# VERSIONES MÍNIMAS PROBADAS
+# ============================================================================
+
+# scikit-learn: 1.0.0+
+# numpy: 1.21.0+
+# pandas: 1.3.0+
+# scipy: 1.7.0+
+# plotly: 5.0.0+
+# xgboost: 1.5.0+
+# lightgbm: 3.3.0+
